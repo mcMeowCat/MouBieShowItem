@@ -30,7 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Method;
 
 /**
- * 物品事件建構器
+ * 懸停物品事件事件建構器
  * @author MouBieCat
  */
 public record ItemHoverEventBuilder(@NotNull ItemStack itemStack)
@@ -63,19 +63,26 @@ public record ItemHoverEventBuilder(@NotNull ItemStack itemStack)
      */
     @NotNull
     public HoverEvent build() {
+        // 反射獲取 org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack
         final Class<?> craftItemStackClass = CraftBukkitReflect.getCraftBukkitClass(CRAFT_ITEM_STACK_CLASS_PATH);
+
+        // 反射獲取方法 asNMSCopy
         final Method asNMSCopy = CraftBukkitReflect.getMethod(craftItemStackClass, AS_NMSCopy, ItemStack.class);
+
+        // 調用方法，且獲得 net.minecraft.world.item.ItemStack
         final net.minecraft.world.item.ItemStack nmsItemStack =
                 (net.minecraft.world.item.ItemStack) CraftBukkitReflect.invoke(asNMSCopy, null, this.itemStack);
 
-        final net.md_5.bungee.api.chat.hover.content.Item md5Item =
+        // 創建懸浮項目對象
+        final net.md_5.bungee.api.chat.hover.content.Item md_5Item =
                 new net.md_5.bungee.api.chat.hover.content.Item(
-                        "minecraft:" + itemStack.getType().name().toLowerCase(),
-                        nmsItemStack.getCount(),
-                        ItemTag.ofNbt(nmsItemStack.getOrCreateTag().toString())
+                        "minecraft:" + itemStack.getType().name().toLowerCase(),     // 名稱
+                        nmsItemStack.getCount(),                                         // 數量
+                        ItemTag.ofNbt(nmsItemStack.getOrCreateTag().toString())          // NBTTag 字串
                 );
 
-        return new HoverEvent(HoverEvent.Action.SHOW_ITEM, md5Item);
+        // 返回對象結果
+        return new HoverEvent(HoverEvent.Action.SHOW_ITEM, md_5Item);
     }
 
 }
