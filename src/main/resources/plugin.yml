@@ -1,0 +1,15 @@
+name: MouBieShowItem
+
+version: '${project.version}'
+api-version: ${plugin.api.version}
+
+authors: [ MouBieCat ]
+
+depend: [ MouBieAPI, ChatControl ]
+
+main: com.cat.server.MouBieCat
+
+commands:
+  MouBieShowItem:
+    aliases: [ si ]
+    description: ""
