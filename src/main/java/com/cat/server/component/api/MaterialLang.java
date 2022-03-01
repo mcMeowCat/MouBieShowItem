@@ -19,9 +19,8 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-package com.cat.server.component;
+package com.cat.server.component.api;
 
-import com.cat.server.component.api.Translatable;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 

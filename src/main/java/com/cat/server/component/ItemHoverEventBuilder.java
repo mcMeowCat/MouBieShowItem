@@ -19,8 +19,9 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-package com.cat.server.component.api;
+package com.cat.server.component;
 
+import com.cat.server.component.api.HoverEventBuilder;
 import com.moubieapi.moubieapi.reflect.CraftBukkitReflect;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.ItemTag;

@@ -21,6 +21,7 @@
 
 package com.cat.server.component.api;
 
+import com.cat.server.component.ItemHoverEventBuilder;
 import com.moubieapi.api.builder.Builder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.inventory.ItemStack;
