@@ -25,6 +25,7 @@ import com.cat.server.component.api.HoverEventBuilder;
 import com.moubieapi.moubieapi.reflect.CraftBukkitReflect;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.ItemTag;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -77,13 +78,22 @@ public record ItemHoverEventBuilder(@NotNull ItemStack itemStack)
         // 創建懸浮項目對象
         final net.md_5.bungee.api.chat.hover.content.Item md_5Item =
                 new net.md_5.bungee.api.chat.hover.content.Item(
-                        "minecraft:" + itemStack.getType().name().toLowerCase(),     // 名稱
+                        this.getMaterialID(this.itemStack.getType()),                    // 名稱
                         nmsItemStack.getCount(),                                         // 數量
                         ItemTag.ofNbt(nmsItemStack.getOrCreateTag().toString())          // NBTTag 字串
                 );
 
         // 返回對象結果
         return new HoverEvent(HoverEvent.Action.SHOW_ITEM, md_5Item);
+    }
+
+    /**
+     * 獲取材質ID
+     * @param material 材質
+     * @return 材質ID
+     */
+    private String getMaterialID(final @NotNull Material material) {
+        return "minecraft:" + material.name().toLowerCase();
     }
 
 }

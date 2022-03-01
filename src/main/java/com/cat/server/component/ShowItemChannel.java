@@ -4,6 +4,7 @@ import com.cat.server.component.api.HoverEventBuilder;
 import com.cat.server.component.api.MaterialLang;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.TranslatableComponent;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -73,18 +74,42 @@ public record ShowItemChannel(@NotNull SimpleChannel channel) {
         final SimplePlayerCache playerCache = SimplePlayerCache.getFor(sender);
         playerCache.lastMessageTime = System.currentTimeMillis() / 1000L;
 
-        for (final Player serverPlayer : this.channel.getPlayers().keySet()) {
-            // 如果玩家隱藏了該玩家的訊息
-            final SimplePlayerCache serverPlayerCache = SimplePlayerCache.getFor(serverPlayer);
-            if (serverPlayerCache.isIgnoring(serverPlayer))
-                continue;
+        // 處理範圍頻道
+        if (this.channel.isRanged()) {
+            // 發送給自己
+            messageObj.send(sender);
 
-            // 發送訊息
-            messageObj.send(serverPlayer);
+            final int range = this.channel.getRange().getRangeBlocks();
+            for (final Entity nearbyEntity : sender.getNearbyEntities(range, range, range)) {
+                if (nearbyEntity instanceof Player nearbyPlayer) {
+                    // 如果玩家隱藏了該玩家的訊息
+                    final SimplePlayerCache serverPlayerCache = SimplePlayerCache.getFor(nearbyPlayer);
+                    if (serverPlayerCache.isIgnoring(nearbyPlayer))
+                        continue;
 
-            // 發送至 BungeeCord
-            if (this.channel.isBungee())
-                messageObj.sendBungeeChannel(serverPlayer, this.channel.getName());
+                    // 發送訊息
+                    messageObj.send(nearbyPlayer);
+
+                    // 發送至 BungeeCord
+                    if (this.channel.isBungee())
+                        messageObj.sendBungeeChannel(nearbyPlayer, this.channel.getName());
+                }
+            }
+
+        // 處理全局頻道
+        } else {
+            for (final Player serverPlayer : this.channel.getPlayers().keySet()) {
+                // 如果玩家隱藏了該玩家的訊息
+                final SimplePlayerCache serverPlayerCache = SimplePlayerCache.getFor(serverPlayer);
+                if (serverPlayerCache.isIgnoring(serverPlayer))
+                    continue;
+
+                // 發送訊息
+                messageObj.send(serverPlayer);
+                // 發送至 BungeeCord
+                if (this.channel.isBungee())
+                    messageObj.sendBungeeChannel(serverPlayer, this.channel.getName());
+            }
         }
     }
 
