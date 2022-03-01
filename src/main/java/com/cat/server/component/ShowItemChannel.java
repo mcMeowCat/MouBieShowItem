@@ -21,11 +21,14 @@
 
 package com.cat.server.component;
 
+import com.cat.server.MouBieCat;
+import com.cat.server.component.api.ChannelSender;
 import com.cat.server.component.api.HoverEventBuilder;
 import com.cat.server.component.api.MaterialLang;
+import com.cat.server.component.sender.BasicChannelSender;
+import com.cat.server.component.sender.RangeChannelSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.TranslatableComponent;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -33,22 +36,40 @@ import org.jetbrains.annotations.Nullable;
 import org.mineacademy.chatcontrol.SimplePlayerCache;
 import org.mineacademy.chatcontrol.api.CheckResult;
 import org.mineacademy.chatcontrol.api.EventCancelledException;
+import org.mineacademy.chatcontrol.api.channel.Channel;
 import org.mineacademy.chatcontrol.lib.fo.Common;
 import org.mineacademy.chatcontrol.lib.fo.PlayerUtil;
 import org.mineacademy.chatcontrol.listener.ListenerChecker;
 import org.mineacademy.chatcontrol.model.FormattedMessage;
 import org.mineacademy.chatcontrol.model.InteractiveChat;
-import org.mineacademy.chatcontrol.model.SimpleChannel;
 import org.mineacademy.chatcontrol.settings.Localization;
 
-public record ShowItemChannel(@NotNull SimpleChannel channel) {
+/**
+ * 帶鰾一個顯示物品的專用頻道
+ * @author MouBieCat
+ */
+public final class ShowItemChannel {
+
+    // 頻道
+    @NotNull
+    private final Channel channel;
+
+    // 範圍頻道發送者
+    @NotNull
+    private final ChannelSender rangeSender;
+
+    // 基礎頻道發送者
+    @NotNull
+    private final ChannelSender basicSender;
 
     /**
      * 建構子
      * @param channel 頻道
      */
-    public ShowItemChannel(final @NotNull SimpleChannel channel) {
+    public ShowItemChannel(final @NotNull Channel channel) {
         this.channel = channel;
+        this.rangeSender = new RangeChannelSender(channel);
+        this.basicSender = new BasicChannelSender(channel);
     }
 
     /**
@@ -89,49 +110,22 @@ public record ShowItemChannel(@NotNull SimpleChannel channel) {
 
     /**
      * 發送顯示物品訊息訊息
+     * @param sender 發送者
+     * @param messageObj 訊息
      */
     private void sendMessage0(final @NotNull Player sender, final @NotNull FormattedMessage messageObj) {
         // 使玩家發言時間設置為現在
         final SimplePlayerCache playerCache = SimplePlayerCache.getFor(sender);
         playerCache.lastMessageTime = System.currentTimeMillis() / 1000L;
 
-        // 處理範圍頻道
-        if (this.channel.isRanged()) {
-            // 發送給自己
-            messageObj.send(sender);
+        MouBieCat.getInstance().getDebugger().info("ShowItemChannel#show");
 
-            final int range = this.channel.getRange().getRangeBlocks();
-            for (final Entity nearbyEntity : sender.getNearbyEntities(range, range, range)) {
-                if (nearbyEntity instanceof Player nearbyPlayer) {
-                    // 如果玩家隱藏了該玩家的訊息
-                    final SimplePlayerCache serverPlayerCache = SimplePlayerCache.getFor(nearbyPlayer);
-                    if (serverPlayerCache.isIgnoring(nearbyPlayer))
-                        continue;
+        // 處理範圍頻道 或 處理全局頻道
+        if (this.channel.getRange() != null)
+            this.rangeSender.sendMessage(sender, messageObj);
 
-                    // 發送訊息
-                    messageObj.send(nearbyPlayer);
-
-                    // 發送至 BungeeCord
-                    if (this.channel.isBungee())
-                        messageObj.sendBungeeChannel(nearbyPlayer, this.channel.getName());
-                }
-            }
-
-        // 處理全局頻道
-        } else {
-            for (final Player serverPlayer : this.channel.getPlayers().keySet()) {
-                // 如果玩家隱藏了該玩家的訊息
-                final SimplePlayerCache serverPlayerCache = SimplePlayerCache.getFor(serverPlayer);
-                if (serverPlayerCache.isIgnoring(serverPlayer))
-                    continue;
-
-                // 發送訊息
-                messageObj.send(serverPlayer);
-                // 發送至 BungeeCord
-                if (this.channel.isBungee())
-                    messageObj.sendBungeeChannel(serverPlayer, this.channel.getName());
-            }
-        }
+        else
+            this.basicSender.sendMessage(sender, messageObj);
     }
 
     /**
@@ -160,7 +154,7 @@ public record ShowItemChannel(@NotNull SimpleChannel channel) {
      * @return 頻道
      */
     @NotNull
-    public SimpleChannel getChannel() {
+    public Channel getChannel() {
         return this.channel;
     }
 

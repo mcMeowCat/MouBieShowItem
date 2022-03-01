@@ -22,14 +22,17 @@
 package com.cat.server;
 
 import com.cat.server.commands.CommandMain;
-import com.cat.server.component.ShowItemChannel;
+import com.cat.server.component.api.PluginMessage;
 import com.moubieapi.api.plugin.PluginRegister;
 import com.moubieapi.moubieapi.plugin.MouBiePluginBase;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
-import org.mineacademy.chatcontrol.model.SimpleChannel;
+import org.mineacademy.chatcontrol.api.channel.Channel;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * 代表該插件的主要類
@@ -38,17 +41,17 @@ import org.mineacademy.chatcontrol.model.SimpleChannel;
 public final class MouBieCat
         extends MouBiePluginBase implements Listener {
 
-    // 顯示物品頻道
-    private ShowItemChannel showItemChannel;
+    private PluginMessage messageLoader;
 
+    // 展示物品的頻道集合
+    private final Map<String, Channel> channels = new LinkedHashMap<>();
 
     @PluginRegister(name = "加載插件配置", type = PluginRegister.ActionType.ACTION_ENABLE, priority = PluginRegister.ActionPriority.HIGHEST)
     public void registerFiles() {
-        final ChannelLoader loader = new ChannelLoader();
+        messageLoader = new MessageLoader();
+        final ChannelsLoader loader = new ChannelsLoader();
 
-        final SimpleChannel showItemChannel = loader.getShowItemChannel();
-        if (showItemChannel != null)
-            this.showItemChannel = new ShowItemChannel(showItemChannel);
+        loader.loadChannels(this.channels);
     }
 
 
@@ -62,21 +65,29 @@ public final class MouBieCat
 
     @PluginRegister(name = "重讀插件配置",type = PluginRegister.ActionType.ACTION_RELOAD)
     public void reloadFiles() {
-        final ChannelLoader loader = new ChannelLoader();
-
-        final SimpleChannel showItemChannel = loader.getShowItemChannel();
-        if (showItemChannel != null)
-            this.showItemChannel = new ShowItemChannel(showItemChannel);
+        channels.clear();
+        messageLoader = new MessageLoader();
+        final ChannelsLoader loader = new ChannelsLoader();
+        loader.loadChannels(this.channels);
     }
 
 
     /**
-     * 獲取用於顯示物品的頻道類
-     * @return 顯示物品頻道
+     * 獲取可以展示物品的頻道集合
+     * @return 頻道集合
      */
     @NotNull
-    public ShowItemChannel getShowItemChannel() {
-        return this.showItemChannel;
+    public Map<String, Channel> getCanShowItemChannels() {
+        return this.channels;
+    }
+
+    /**
+     * 獲取插件訊訊息檔案(Message.yml)
+     * @return Message.yml
+     */
+    @NotNull
+    public PluginMessage getMessageLoader() {
+        return this.messageLoader;
     }
 
     /**

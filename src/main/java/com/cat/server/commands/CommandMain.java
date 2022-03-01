@@ -22,11 +22,12 @@
 package com.cat.server.commands;
 
 import com.cat.server.MouBieCat;
+import com.cat.server.commands.args.CommandSend;
+import com.moubieapi.api.commands.CommandNode;
 import com.moubieapi.api.commands.SenderType;
 import com.moubieapi.moubieapi.commands.CommandMainNodeAbstract;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -45,28 +46,36 @@ public final class CommandMain
      */
     public CommandMain(final @NotNull PluginCommand pluginCommand) {
         super(pluginCommand, SenderType.PLAYER_SENDER);
+
+        /* Register Command Nodes */
+        this.nextNodes.add("send", new CommandSend(1, "send"));
     }
 
     /**
      * 當指令被觸發
      * @param sender 指令發送者
-     * @param strings 參數
+     * @param args 參數
      * @return 是否運行成功
      */
-    public boolean onCommand(final @NotNull CommandSender sender, final @NotNull String[] strings) {
-        final Player player = (Player) sender;
-        return MouBieCat.getInstance().getShowItemChannel().sendMessage(player, player.getInventory().getItemInMainHand());
+    public boolean onCommand(final @NotNull CommandSender sender, final @NotNull String[] args) {
+        sender.sendMessage(MouBieCat.getInstance().getMessageLoader().getHelpMessage());
+        return false;
     }
 
     /**
      * 當指令幫助TAB被觸發
      * @param commandSender 指令發送者
-     * @param strings 參數
+     * @param args 參數
      * @return 幫助訊息集合
      */
     @NotNull
-    public List<String> onTab(final @NotNull CommandSender commandSender, final @NotNull String[] strings) {
-        return new ArrayList<>();
+    public List<String> onTab(final @NotNull CommandSender commandSender, final @NotNull String[] args) {
+        final ArrayList<String> strings = new ArrayList<>();
+
+        for (final CommandNode node : this.nextNodes.getValues())
+            strings.add(node.getNodeName());
+
+        return strings;
     }
 
 }

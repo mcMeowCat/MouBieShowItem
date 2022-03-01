@@ -21,39 +21,44 @@
 
 package com.cat.server;
 
-import com.moubieapi.moubieapi.yaml.Loader;
-import org.jetbrains.annotations.Nullable;
-import org.mineacademy.chatcontrol.model.SimpleChannel;
-import org.mineacademy.chatcontrol.settings.ChannelSettings;
+import com.cat.server.component.api.PluginMessage;
+import com.moubieapi.moubieapi.yaml.utils.PluginFileLoaderAbstract;
+import org.jetbrains.annotations.NotNull;
 
 /**
- * 代表一個頻道加載器
+ * 代表一個訊息加載器
  * @author MouBieCat
  */
-public final class ChannelLoader
-        extends Loader {
+public final class MessageLoader
+        extends PluginFileLoaderAbstract implements PluginMessage {
+
+    private static final String MESSAGE_NOT_CHANNEL = "NotChannel";
+
+    private static final String MESSAGE_HELP_MESSAGE = "HelpMessage";
 
     /**
      * 建構子
      */
-    public ChannelLoader() {
-        super(MouBieCat.getInstance(), "", "Channel.yml", false);
+    public MessageLoader() {
+        super(MouBieCat.getInstance(), "", "Message.yml");
     }
 
     /**
-     * 獲取用於顯示物品的頻道
-     * @return 頻道
+     * 獲取找不到頻道的訊息
+     * @return 訊息
      */
-    @Nullable
-    public SimpleChannel getShowItemChannel() {
-        final @Nullable SimpleChannel channel = ChannelSettings.getChannel(this.getString("Channel"));
+    @NotNull
+    public String getNotChannelMessage() {
+        return this.getString(MESSAGE_NOT_CHANNEL);
+    }
 
-        if (channel == null) {
-            MouBieCat.getInstance().getDebugger().warning("");
-            return null;
-        }
-
-        return channel;
+    /**
+     * 獲取幫助訊息
+     * @return 訊息
+     */
+    @NotNull
+    public String getHelpMessage() {
+        return this.getString(MESSAGE_HELP_MESSAGE);
     }
 
 }
