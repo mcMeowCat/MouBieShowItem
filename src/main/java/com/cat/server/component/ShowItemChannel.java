@@ -73,12 +73,19 @@ public record ShowItemChannel(@NotNull SimpleChannel channel) {
         final SimplePlayerCache playerCache = SimplePlayerCache.getFor(sender);
         playerCache.lastMessageTime = System.currentTimeMillis() / 1000L;
 
-        // 發送訊息
-        messageObj.send(sender);
+        for (final Player serverPlayer : this.channel.getPlayers().keySet()) {
+            // 如果玩家隱藏了該玩家的訊息
+            final SimplePlayerCache serverPlayerCache = SimplePlayerCache.getFor(serverPlayer);
+            if (serverPlayerCache.isIgnoring(serverPlayer))
+                continue;
 
-        // 發送至 BungeeCord
-        if (this.channel.isBungee())
-            messageObj.sendBungeeChannel(sender, this.channel.getName());
+            // 發送訊息
+            messageObj.send(serverPlayer);
+
+            // 發送至 BungeeCord
+            if (this.channel.isBungee())
+                messageObj.sendBungeeChannel(serverPlayer, this.channel.getName());
+        }
     }
 
     /**
