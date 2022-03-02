@@ -103,7 +103,7 @@ public final class ShowItemChannel {
 
         // 創建組件格式
         messageComponent.addExtra(
-                this.createMessageComponent(MouBieCat.getInstance().getMessageLoader().getShowMessage(), translatable)
+                this.createMessageComponent(itemStack, MouBieCat.getInstance().getMessageLoader().getShowMessage(), translatable)
         );
 
         // 實例訊息發送物件
@@ -134,13 +134,17 @@ public final class ShowItemChannel {
 
     /**
      * 創建展示物品訊息格式
+     * @param itemStack 物品
      * @param format 格式
      * @param translatable 可翻譯物件
      * @return 創建後的格式
      */
     @NotNull
-    private TextComponent createMessageComponent(final @NotNull String format, final @NotNull TranslatableComponent translatable) {
+    private TextComponent createMessageComponent(final @NotNull ItemStack itemStack, final @NotNull String format, final @NotNull TranslatableComponent translatable) {
         final TextComponent componentBuffer = new TextComponent();
+
+        String formatBuffer = format;
+        formatBuffer = formatBuffer.replace("{amount}", ""+itemStack.getAmount());
 
         /**
          * 警告: 這裡處理的方式暫時這樣。這種方式遇到多種佔位符，將導致前所未有的大爆炸。
@@ -148,7 +152,7 @@ public final class ShowItemChannel {
          * TIP: 如果有人有更好的處裡方式，請聯絡我。謝謝
          */
         final Iterator<String> iterator =
-                Arrays.stream(MouBieCat.getInstance().getMessageLoader().getShowMessage().split("\\{item}")).iterator();
+                Arrays.stream(formatBuffer.split("\\{item}")).iterator();
         do {
             componentBuffer.addExtra(iterator.next());
 
