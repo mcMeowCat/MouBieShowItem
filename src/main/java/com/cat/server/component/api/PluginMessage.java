@@ -43,4 +43,10 @@ public interface PluginMessage
      */
     @NotNull String getHelpMessage();
 
+    /**
+     * 獲取展示物品訊息
+     * @return 訊息
+     */
+    @NotNull String getShowMessage();
+
 }

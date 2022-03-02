@@ -44,6 +44,9 @@ import org.mineacademy.chatcontrol.model.FormattedMessage;
 import org.mineacademy.chatcontrol.model.InteractiveChat;
 import org.mineacademy.chatcontrol.settings.Localization;
 
+import java.util.Arrays;
+import java.util.Iterator;
+
 /**
  * 帶鰾一個顯示物品的專用頻道
  * @author MouBieCat
@@ -91,19 +94,20 @@ public final class ShowItemChannel {
             return false;
 
         // 以玩家狀態獲取該頻道的格式
-        final TextComponent component = InteractiveChat.createComponent("", this.channel.getChatFormat(), player);
+        final TextComponent messageComponent =
+                InteractiveChat.createComponent("", this.channel.getChatFormat(), player);
 
         // 處理翻譯組件
         final TranslatableComponent translatable = new TranslatableComponent(MaterialLang.get(itemStack.getType()).getTranslation());
         translatable.setHoverEvent(HoverEventBuilder.BuilderOptions.createHoverEvent(itemStack).build());
 
-        // 處理文字
-        component.addExtra("§f嘿！我手上有一個酷東西 [§b");
-        component.addExtra(translatable);
-        component.addExtra("§f]。");
+        // 創建組件格式
+        messageComponent.addExtra(
+                this.createMessageComponent(MouBieCat.getInstance().getMessageLoader().getShowMessage(), translatable)
+        );
 
         // 實例訊息發送物件
-        final FormattedMessage messageObj = FormattedMessage.fromComponent(component);
+        final FormattedMessage messageObj = FormattedMessage.fromComponent(messageComponent);
         this.sendMessage0(player, messageObj);
         return true;
     }
@@ -126,6 +130,28 @@ public final class ShowItemChannel {
 
         else
             this.basicSender.sendMessage(sender, messageObj);
+    }
+
+    /**
+     * 創建展示物品訊息格式
+     * @param format 格式
+     * @param translatable 可翻譯物件
+     * @return 創建後的格式
+     */
+    @NotNull
+    private TextComponent createMessageComponent(final @NotNull String format, final @NotNull TranslatableComponent translatable) {
+        final TextComponent componentBuffer = new TextComponent();
+
+        final Iterator<String> iterator =
+                Arrays.stream(MouBieCat.getInstance().getMessageLoader().getShowMessage().split("\\{item}")).iterator();
+        do {
+            componentBuffer.addExtra(iterator.next());
+
+            if (iterator.hasNext())
+                componentBuffer.addExtra(translatable);
+        } while (iterator.hasNext());
+
+        return componentBuffer;
     }
 
     /**

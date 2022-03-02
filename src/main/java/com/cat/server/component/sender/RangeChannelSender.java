@@ -66,7 +66,7 @@ public final class RangeChannelSender
             this.sendBungeeCord(serverPlayer, messageObj);
         }
 
-        // 判斷附近是否有人，否則發送附近媒人的訊息
+        // 判斷附近是否有人，否則發送附近無人接收的訊息
         if (inRangePlayers.size() <= 1)
             Common.tellTimed(4, sender, Localization.CHAT_OUT_OF_RANGE);
     }

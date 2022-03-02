@@ -30,11 +30,14 @@ import org.jetbrains.annotations.NotNull;
  * @author MouBieCat
  */
 public final class MessageLoader
-        extends PluginFileLoaderAbstract implements PluginMessage {
+        extends PluginFileLoaderAbstract
+        implements PluginMessage {
 
     private static final String MESSAGE_NOT_CHANNEL = "NotChannel";
 
     private static final String MESSAGE_HELP_MESSAGE = "HelpMessage";
+
+    private static final String MESSAGE_SHOW_MESSAGE = "ShowMessage";
 
     /**
      * 建構子
@@ -59,6 +62,15 @@ public final class MessageLoader
     @NotNull
     public String getHelpMessage() {
         return this.getString(MESSAGE_HELP_MESSAGE);
+    }
+
+    /**
+     * 獲取展示物品訊息
+     * @return 訊息
+     */
+    @NotNull
+    public String getShowMessage() {
+        return this.getString(MESSAGE_SHOW_MESSAGE);
     }
 
 }
