@@ -142,6 +142,11 @@ public final class ShowItemChannel {
     private TextComponent createMessageComponent(final @NotNull String format, final @NotNull TranslatableComponent translatable) {
         final TextComponent componentBuffer = new TextComponent();
 
+        /**
+         * 警告: 這裡處理的方式暫時這樣。這種方式遇到多種佔位符，將導致前所未有的大爆炸。
+         *
+         * TIP: 如果有人有更好的處裡方式，請聯絡我。謝謝
+         */
         final Iterator<String> iterator =
                 Arrays.stream(MouBieCat.getInstance().getMessageLoader().getShowMessage().split("\\{item}")).iterator();
         do {
